@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <stdint.h>
 #include <pthread.h>
 
 
@@ -18,13 +18,10 @@ int main(void) {
 	pthread_t treads[2];
 	int s;
 
-	int * par = calloc(2, sizeof(int));
-	par[1] = 1;
-
 	// create N threads
 	for(int i=0 ; i<N ; i++){
-		void * pi = &i;
-		s = pthread_create(&treads[i], NULL, thread_function, pi);
+		long index = (long) i;
+		s = pthread_create(&treads[i], NULL, thread_function, (void *) index);
 		if (s != 0) {
 			perror("pthread_create()\n");
 			exit(EXIT_FAILURE);
@@ -51,9 +48,11 @@ int main(void) {
 	exit(EXIT_SUCCESS);
 }
 
+
 void * thread_function(void * index){
 
-	int * pindex = (int *) index;
+	long temp = (long) index;
+	int arg = (int) temp;
 
 	while(1){
 		pthread_mutex_lock(&mutex);
@@ -65,8 +64,8 @@ void * thread_function(void * index){
 		}
 
 		count++;
-		printf("thread index: %d ha incrementato count a: %d\n", *pindex, count);
-		work[*pindex]++;
+		printf("thread index: %d ha incrementato count a: %d\n", arg, count);
+		work[arg]++;
 
 		// rilascio mutex
 		pthread_mutex_unlock(&mutex);
