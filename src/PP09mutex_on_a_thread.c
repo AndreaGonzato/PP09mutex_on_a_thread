@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <stdint.h>
 #include <pthread.h>
 
 
@@ -23,8 +23,8 @@ int main(void) {
 
 	// create N threads
 	for(int i=0 ; i<N ; i++){
-		void * pi = &i;
-		s = pthread_create(&treads[i], NULL, thread_function, pi);
+		uintptr_t index = (uintptr_t) i;
+		s = pthread_create(&treads[i], NULL, thread_function, (void *) index);
 		if (s != 0) {
 			perror("pthread_create()\n");
 			exit(EXIT_FAILURE);
@@ -53,7 +53,7 @@ int main(void) {
 
 void * thread_function(void * index){
 
-	int * pindex = (int *) index;
+	uintptr_t arg = (uintptr_t) index;
 
 	while(1){
 		pthread_mutex_lock(&mutex);
@@ -65,8 +65,8 @@ void * thread_function(void * index){
 		}
 
 		count++;
-		printf("thread index: %d ha incrementato count a: %d\n", *pindex, count);
-		work[*pindex]++;
+		printf("thread index: %d ha incrementato count a: %d\n", (int) arg, count);
+		work[(int) arg]++;
 
 		// rilascio mutex
 		pthread_mutex_unlock(&mutex);
